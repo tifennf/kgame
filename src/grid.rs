@@ -13,15 +13,6 @@ use bevy_ecs_tilemap::{
 
 const N: u32 = 10;
 
-#[derive(Component)]
-pub struct Position {
-    pub x: u32,
-    pub y: u32,
-}
-
-#[derive(Component)]
-pub struct Node;
-
 // create the grid with N**2 node in it
 fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // camera for rendering
@@ -69,14 +60,14 @@ fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
         ..Default::default()
     });
 
-    #[cfg(all(not(feature = "atlas"), feature = "render"))]
-    {
-        array_texture_loader.add(TilemapArrayTexture {
-            texture: TilemapTexture::Single(asset_server.load("tiles.png")),
-            tile_size,
-            ..Default::default()
-        });
-    }
+    // #[cfg(all(not(feature = "atlas"), feature = "render"))]
+    // {
+    //     array_texture_loader.add(TilemapArrayTexture {
+    //         texture: TilemapTexture::Single(asset_server.load("tiles.png")),
+    //         tile_size,
+    //         ..Default::default()
+    //     });
+    // }
 }
 
 pub struct GridPlugin;
