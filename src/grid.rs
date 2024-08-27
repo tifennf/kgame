@@ -1,5 +1,5 @@
 use bevy::{
-    app::{Plugin, Startup},
+    app::{Plugin, Startup, Update},
     asset::{AssetServer, Handle},
     color::Color,
     prelude::{Camera2dBundle, ClearColor, Commands, Component, Image, Res},
@@ -13,7 +13,6 @@ use bevy_ecs_tilemap::{
 
 const N: u32 = 10;
 
-// create the grid with N**2 node in it
 fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // camera for rendering
     cmd.spawn(Camera2dBundle::default());
@@ -22,7 +21,7 @@ fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     let texture_handle: Handle<Image> = asset_server.load("tile.png");
 
     // set grid size ( unit is tile )
-    let map_size = TilemapSize { x: 32, y: 32 };
+    let map_size = TilemapSize { x: 16, y: 16 };
 
     // create a entity for the grid and a collection of tiles
     let tilemap_entity = cmd.spawn_empty().id();
@@ -47,7 +46,7 @@ fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
 
     let tile_size = TilemapTileSize { x: 32.0, y: 32.0 }; // px
     let grid_size = tile_size.into(); // same size
-    let map_type = TilemapType::default(); // square tile
+    let map_type = TilemapType::Square; // square tile
 
     cmd.entity(tilemap_entity).insert(TilemapBundle {
         grid_size,
@@ -59,15 +58,6 @@ fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
         transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
         ..Default::default()
     });
-
-    // #[cfg(all(not(feature = "atlas"), feature = "render"))]
-    // {
-    //     array_texture_loader.add(TilemapArrayTexture {
-    //         texture: TilemapTexture::Single(asset_server.load("tiles.png")),
-    //         tile_size,
-    //         ..Default::default()
-    //     });
-    // }
 }
 
 pub struct GridPlugin;
