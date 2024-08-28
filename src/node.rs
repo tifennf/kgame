@@ -1,21 +1,15 @@
-use bevy::{
-    color::palettes::css::RED,
-    input::{mouse::MouseButtonInput, ButtonState},
-    prelude::*,
-    sprite::MaterialMesh2dBundle,
-    window::PrimaryWindow,
-};
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_ecs_tilemap::{
     map::{TilemapGridSize, TilemapSize, TilemapType},
     tiles::{TilePos, TileStorage},
 };
 
-use crate::utils::CursorPos;
+use crate::{game_state::GameState, utils::CursorPos};
 
 #[derive(Component)]
 pub struct Node(Entity);
 
-pub fn handle_click(
+pub fn spawn_node_on_click(
     mut commands: Commands,
     cursor_pos: Res<CursorPos>,
     buttons: Res<ButtonInput<MouseButton>>,
@@ -28,6 +22,7 @@ pub fn handle_click(
     )>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut gstate: ResMut<GameState>,
 ) {
     //
     if buttons.just_pressed(MouseButton::Left) {
@@ -63,14 +58,14 @@ pub fn handle_click(
                             transform: Transform::default()
                                 .with_scale(Vec3::splat(16.0))
                                 .with_translation(center.xy().extend(1.0)), // here
-                            material: materials.add(Color::from(RED)),
+                            material: materials.add(gstate.node_color),
                             ..default()
                         })
                         .id();
 
-                    println!("({}, {})", center.x, center.y);
-
                     commands.entity(tile_entity).insert(Node(node_entity));
+
+                    gstate.next_turn();
                 }
             }
         }

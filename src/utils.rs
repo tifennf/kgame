@@ -28,7 +28,7 @@ pub fn update_cursor_pos(
     }
 }
 
-use bevy::{input::ButtonInput, math::Vec3, prelude::*, render::camera::Camera};
+use bevy::{input::ButtonInput, math::Vec3, render::camera::Camera};
 
 // A simple camera system for moving and zooming the camera.
 pub fn camera_movement(

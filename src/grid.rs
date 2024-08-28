@@ -11,17 +11,19 @@ use bevy_ecs_tilemap::{
     TilemapBundle,
 };
 
-const N: u32 = 10;
+const N: u32 = 16;
+const TILE_ASSET_SIZE: f32 = 32.0; // px
+const TILE_ASSET_PATH: &str = "tiles.png";
 
 fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // camera for rendering
     cmd.spawn(Camera2dBundle::default());
 
     // load the asset
-    let texture_handle: Handle<Image> = asset_server.load("tile.png");
+    let texture_handle: Handle<Image> = asset_server.load(TILE_ASSET_PATH);
 
     // set grid size ( unit is tile )
-    let map_size = TilemapSize { x: 16, y: 16 };
+    let map_size = TilemapSize { x: N, y: N };
 
     // create a entity for the grid and a collection of tiles
     let tilemap_entity = cmd.spawn_empty().id();
@@ -44,7 +46,10 @@ fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
         }
     }
 
-    let tile_size = TilemapTileSize { x: 32.0, y: 32.0 }; // px
+    let tile_size = TilemapTileSize {
+        x: TILE_ASSET_SIZE,
+        y: TILE_ASSET_SIZE,
+    }; // px
     let grid_size = tile_size.into(); // same size
     let map_type = TilemapType::Square; // square tile
 
