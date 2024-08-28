@@ -109,7 +109,7 @@ impl DotStorage {
     }
 }
 
-// system function to spawn node when player click on a tile, according to his color
+// system function to spawn dot when player click on a tile, according to his color
 pub fn spawn_dot_on_click(
     mut commands: Commands,
     cursor_pos: Res<CursorPos>,
@@ -155,8 +155,8 @@ pub fn spawn_dot_on_click(
                     match gstate.dot_storage.peek(&tile_pos) {
                         Some(_) => (),
                         None => {
-                            // spawn node entity
-                            let node_entity = commands
+                            // spawn dot entity
+                            let dot_entity = commands
                                 .spawn(MaterialMesh2dBundle {
                                     mesh: meshes.add(Circle::default()).into(),
                                     transform: Transform::default()
@@ -167,13 +167,14 @@ pub fn spawn_dot_on_click(
                                 })
                                 .id();
 
+                            // create a new dot component
                             let new_dot = Dot {
-                                entity: node_entity,
+                                entity: dot_entity,
                                 pos: tile_pos,
                                 color: gstate.dot_color.clone(),
                             };
 
-                            // place dot on top of target tile
+                            // place dot on top of target tile and register it into dot storage
                             commands.entity(tile_entity).insert(new_dot.clone());
                             gstate.dot_storage.push(new_dot);
 
@@ -185,11 +186,3 @@ pub fn spawn_dot_on_click(
         }
     }
 }
-
-// fn print_node_tiles(q_dot: Query<&Dot>) {
-//     for dot in q_dot.iter() {
-//         let (x, y) = (dot.pos.x, dot.pos.y);
-
-//         println!("Node {} sur le tile ({}, {})", dot.color, x, y);
-//     }
-// }

@@ -1,7 +1,7 @@
 use bevy::{app::Plugin, prelude::Resource};
 
 use crate::{
-    node::{DotColor, DotStorage},
+    dot::{DotColor, DotStorage},
     N,
 };
 

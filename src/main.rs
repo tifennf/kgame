@@ -1,13 +1,13 @@
+mod dot;
 mod game_state;
 mod grid;
-mod node;
 mod utils;
 
 use bevy::prelude::*;
 use bevy_ecs_tilemap::TilemapPlugin;
+use dot::spawn_dot_on_click;
 use game_state::GameStatePlugin;
 use grid::GridPlugin;
-use node::{spawn_dot_on_click, Dot};
 use utils::UtilsPlugin;
 
 pub const N: u32 = 16;
