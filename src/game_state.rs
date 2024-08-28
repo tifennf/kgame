@@ -1,36 +1,34 @@
-use bevy::{
-    app::Plugin,
-    color::{
-        palettes::css::{BLUE, RED},
-        Color,
-    },
-    prelude::Resource,
+use bevy::{app::Plugin, prelude::Resource};
+
+use crate::{
+    node::{DotColor, DotStorage},
+    N,
 };
 
+// Game internal state
 #[derive(Resource)]
 pub struct GameState {
     pub turn: u32,
-    pub node_color: Color,
+    pub dot_color: DotColor,
+    pub dot_storage: DotStorage,
 }
 
 impl Default for GameState {
     fn default() -> Self {
         Self {
             turn: 1,
-            node_color: Color::from(BLUE),
+            dot_color: DotColor::BLUE,
+            dot_storage: DotStorage::empty(N * N),
         }
     }
 }
 
 impl GameState {
     pub fn next_turn(&mut self) {
-        let current_color = self.node_color;
-
-        if current_color == Color::from(BLUE) {
-            self.node_color = Color::from(RED);
-        } else {
-            self.node_color = Color::from(BLUE);
-        }
+        self.dot_color = match self.dot_color {
+            DotColor::RED => DotColor::BLUE,
+            DotColor::BLUE => DotColor::RED,
+        };
 
         self.turn += 1;
     }

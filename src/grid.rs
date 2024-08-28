@@ -11,9 +11,7 @@ use bevy_ecs_tilemap::{
     TilemapBundle,
 };
 
-const N: u32 = 16;
-const TILE_ASSET_SIZE: f32 = 32.0; // px
-const TILE_ASSET_PATH: &str = "tiles.png";
+use crate::{N, TILE_ASSET_PATH, TILE_ASSET_SIZE};
 
 fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // camera for rendering
