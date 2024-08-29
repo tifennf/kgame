@@ -2,7 +2,7 @@ use bevy::{app::Plugin, prelude::Resource};
 
 use crate::{
     dot::{DotColor, DotStorage},
-    N,
+    TILEMAP_SIZE,
 };
 
 // Game internal state
@@ -18,7 +18,7 @@ impl Default for GameState {
         Self {
             turn: 1,
             dot_color: DotColor::BLUE,
-            dot_storage: DotStorage::empty(N * N),
+            dot_storage: DotStorage::empty(TILEMAP_SIZE * TILEMAP_SIZE),
         }
     }
 }
@@ -41,3 +41,5 @@ impl Plugin for GameStatePlugin {
         app.init_resource::<GameState>();
     }
 }
+
+pub fn check_winner() {}

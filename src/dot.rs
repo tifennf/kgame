@@ -10,7 +10,7 @@ use bevy_ecs_tilemap::{
     tiles::{TilePos, TileStorage},
 };
 
-use crate::{game_state::GameState, utils::CursorPos};
+use crate::{game::GameState, utils::CursorPos};
 #[derive(Component)]
 pub struct Dot {
     pub entity: Entity,

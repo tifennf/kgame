@@ -11,7 +11,7 @@ use bevy_ecs_tilemap::{
     TilemapBundle,
 };
 
-use crate::{N, TILE_ASSET_PATH, TILE_ASSET_SIZE};
+use crate::{TILEMAP_SIZE, TILE_ASSET_PATH, TILE_ASSET_SIZE};
 
 fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // camera for rendering
@@ -21,7 +21,10 @@ fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     let texture_handle: Handle<Image> = asset_server.load(TILE_ASSET_PATH);
 
     // set grid size ( unit is tile )
-    let map_size = TilemapSize { x: N, y: N };
+    let map_size = TilemapSize {
+        x: TILEMAP_SIZE,
+        y: TILEMAP_SIZE,
+    };
 
     // create a entity for the grid and a collection of tiles
     let tilemap_entity = cmd.spawn_empty().id();
