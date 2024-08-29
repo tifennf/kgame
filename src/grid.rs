@@ -1,8 +1,8 @@
 use bevy::{
-    app::{Plugin, Startup, Update},
+    app::{Plugin, Startup},
     asset::{AssetServer, Handle},
     color::Color,
-    prelude::{Camera2dBundle, ClearColor, Commands, Component, Image, Res},
+    prelude::{Camera2dBundle, ClearColor, Commands, Image, Res},
 };
 use bevy_ecs_tilemap::{
     map::{TilemapId, TilemapSize, TilemapTexture, TilemapTileSize, TilemapType},

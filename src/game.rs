@@ -1,11 +1,8 @@
-use bevy::{
-    app::Plugin,
-    prelude::{Res, Resource},
-};
+use bevy::{app::Plugin, prelude::Resource};
 
 use crate::{
     dot::{DotColor, DotStorage},
-    TILEMAP_SIZE,
+    KAING_VALUE, TILEMAP_SIZE,
 };
 
 // Game internal state
@@ -92,7 +89,7 @@ fn check_rows(board: &DotStorage, color: &DotColor) -> bool {
                 count = 0;
             }
 
-            if count == 5 {
+            if count == KAING_VALUE {
                 return true;
             }
         }
@@ -121,7 +118,7 @@ fn check_cols(board: &DotStorage, color: &DotColor) -> bool {
                 count = 0;
             }
 
-            if count == 5 {
+            if count == KAING_VALUE {
                 return true;
             }
         }
@@ -162,7 +159,7 @@ fn check_anti_diags(board: &DotStorage, color: &DotColor) -> bool {
                 count = 0;
             }
 
-            if count == 5 {
+            if count == KAING_VALUE {
                 return true;
             }
 
@@ -176,15 +173,15 @@ fn check_anti_diags(board: &DotStorage, color: &DotColor) -> bool {
 
 fn check_diags(board: &DotStorage, color: &DotColor) -> bool {
     // check a for a Kaing in every anti-diagonales
-    // pre: p > 0 && board is a valid board with size >= 5
+    // pre: p > 0 && board is a valid board with size >= KAING_VALUE
 
     let n = board.n;
 
     let mut i_basis = 4;
     let mut j_basis = 0;
 
-    // check the anti-diagonales, no need for the last 5 columns or first 5 rows
-    while i_basis < n && j_basis < n - 5 {
+    // check the anti-diagonales, no need for the last KAING_VALUE columns or first KAING_VALUE rows
+    while i_basis < n && j_basis < n - KAING_VALUE as usize {
         let mut count = 0;
 
         // initial point of the current anti-diagonale
@@ -203,7 +200,7 @@ fn check_diags(board: &DotStorage, color: &DotColor) -> bool {
                 count = 0;
             }
 
-            if count == 5 {
+            if count == KAING_VALUE {
                 return true;
             }
 

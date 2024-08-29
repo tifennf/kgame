@@ -14,6 +14,7 @@ use utils::UtilsPlugin;
 pub const TILEMAP_SIZE: u32 = 100; // tilemap is square matrix shape
 pub const TILE_ASSET_SIZE: f32 = 32.0; // px
 pub const TILE_ASSET_PATH: &str = "tiles.png";
+pub const KAING_VALUE: u32 = 5; // how many aligned dot to win
 
 fn main() {
     App::new()
