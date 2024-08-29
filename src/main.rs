@@ -5,6 +5,10 @@ mod utils;
 
 use bevy::prelude::*;
 
+use bevy_ecs_tilemap::TilemapPlugin;
+use dot::spawn_dot_on_click;
+use game::GameStatePlugin;
+use grid::GridPlugin;
 use utils::UtilsPlugin;
 
 pub const TILEMAP_SIZE: u32 = 10; // tilemap is square matrix shape
@@ -16,18 +20,9 @@ fn main() {
         // .add_plugins(EmbeddedAssetPlugin::default())
         .add_plugins(DefaultPlugins)
         .add_plugins(UtilsPlugin)
-        // .add_plugins(GameStatePlugin)
-        // .add_plugins(GridPlugin)
-        // .add_plugins(TilemapPlugin)
-        // .add_systems(Update, spawn_dot_on_click)
-        .add_systems(Startup, test)
+        .add_plugins(GameStatePlugin)
+        .add_plugins(GridPlugin)
+        .add_plugins(TilemapPlugin)
+        .add_systems(Update, spawn_dot_on_click)
         .run();
-}
-
-fn test(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(SpriteBundle {
-        texture: asset_server.load(TILE_ASSET_PATH),
-
-        ..default()
-    });
 }

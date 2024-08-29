@@ -1,4 +1,7 @@
-use bevy::{app::Plugin, prelude::Resource};
+use bevy::{
+    app::Plugin,
+    prelude::{Res, Resource},
+};
 
 use crate::{
     dot::{DotColor, DotStorage},
@@ -11,6 +14,7 @@ pub struct GameState {
     pub turn: u32,
     pub dot_color: DotColor,
     pub dot_storage: DotStorage,
+    pub open: bool,
 }
 
 impl Default for GameState {
@@ -18,7 +22,8 @@ impl Default for GameState {
         Self {
             turn: 1,
             dot_color: DotColor::BLUE,
-            dot_storage: DotStorage::empty(TILEMAP_SIZE * TILEMAP_SIZE),
+            dot_storage: DotStorage::empty(TILEMAP_SIZE as usize),
+            open: true,
         }
     }
 }
@@ -32,6 +37,8 @@ impl GameState {
 
         self.turn += 1;
     }
+
+    pub fn check_winner(&mut self) {}
 }
 
 pub struct GameStatePlugin;
@@ -41,5 +48,3 @@ impl Plugin for GameStatePlugin {
         app.init_resource::<GameState>();
     }
 }
-
-pub fn check_winner() {}

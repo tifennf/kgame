@@ -10,7 +10,7 @@ use bevy_ecs_tilemap::{
     tiles::{TilePos, TileStorage},
 };
 
-use crate::{game::GameState, utils::CursorPos};
+use crate::{game::GameState, utils::CursorPos, TILEMAP_SIZE};
 #[derive(Component)]
 pub struct Dot {
     pub entity: Entity,
@@ -64,48 +64,40 @@ impl fmt::Display for DotColor {
 
 // dot storage implemented as a stack
 pub struct DotStorage {
-    pub max_len: u32,
-    stack: Vec<Dot>,
+    pub dot_count: u32,
+    matrix: Vec<Vec<Option<Dot>>>,
 }
 
 impl DotStorage {
     // create a new empty DotStorage
-    pub fn empty(map_size: u32) -> DotStorage {
-        let max_len = map_size * map_size;
+    pub fn empty(map_size: usize) -> DotStorage {
+        let matrix = vec![vec![None; map_size]; map_size];
 
         Self {
-            max_len,
-            stack: Vec::new(),
+            dot_count: 0,
+            matrix,
         }
     }
 
     // add dot in the stack, panic if full -> todo
     pub fn push(&mut self, dot: Dot) {
-        let nb_elem: u32 = self.stack.len() as u32;
+        let size = self.matrix[0].len();
+        let size = (size * size) as u32;
 
-        if nb_elem == self.max_len {
+        if self.dot_count == size {
             panic!("too many dot");
         }
 
-        self.stack.push(dot);
-    }
+        let (x, y) = (dot.pos.x as usize, dot.pos.y as usize);
 
-    // remove last inserted dot and return it
-    pub fn pop(&mut self) -> Option<Dot> {
-        self.stack.pop()
+        self.matrix[x][y] = Some(dot);
     }
 
     // return a ref to the dot located at pos
-    pub fn peek(&self, pos: &TilePos) -> Option<&Dot> {
-        let res = None;
+    pub fn peek(&self, pos: &TilePos) -> &Option<Dot> {
+        let (x, y) = (pos.x as usize, pos.y as usize);
 
-        for dot in self.stack.iter() {
-            if dot.pos == *pos {
-                return Some(dot);
-            }
-        }
-
-        res
+        &self.matrix[x][y]
     }
 }
 
@@ -126,6 +118,10 @@ pub fn spawn_dot_on_click(
     mut gstate: ResMut<GameState>,
 ) {
     if buttons.just_pressed(MouseButton::Left) {
+        if !gstate.open {
+            return;
+        }
+
         for (map_size, grid_size, map_type, tile_storage, map_transform) in q_tilemap.iter() {
             // needed in order to match tile with cursor
             let position = cursor_pos.0;
