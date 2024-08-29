@@ -62,42 +62,47 @@ impl fmt::Display for DotColor {
     }
 }
 
-// dot storage implemented as a stack
+// dot storage implemented as a flat matrix
 pub struct DotStorage {
     pub dot_count: u32,
-    matrix: Vec<Vec<Option<Dot>>>,
+    pub n: usize,
+    matrix: Vec<Option<Dot>>,
 }
 
 impl DotStorage {
     // create a new empty DotStorage
     pub fn empty(map_size: usize) -> DotStorage {
-        let matrix = vec![vec![None; map_size]; map_size];
+        let matrix = vec![None; map_size * map_size];
 
         Self {
             dot_count: 0,
             matrix,
+            n: map_size,
         }
     }
 
+    pub fn get(&self, x: usize, y: usize) -> &Option<Dot> {
+        &self.matrix[x * self.n + y]
+    }
     // add dot in the stack, panic if full -> todo
     pub fn push(&mut self, dot: Dot) {
-        let size = self.matrix[0].len();
-        let size = (size * size) as u32;
+        let nb_dot_max = self.matrix.len() as u32;
 
-        if self.dot_count == size {
+        if self.dot_count == nb_dot_max {
             panic!("too many dot");
         }
 
         let (x, y) = (dot.pos.x as usize, dot.pos.y as usize);
 
-        self.matrix[x][y] = Some(dot);
+        self.matrix[x * self.n + y] = Some(dot);
+        self.dot_count += 1;
     }
 
     // return a ref to the dot located at pos
     pub fn peek(&self, pos: &TilePos) -> &Option<Dot> {
         let (x, y) = (pos.x as usize, pos.y as usize);
 
-        &self.matrix[x][y]
+        &self.matrix[x * self.n + y]
     }
 }
 
@@ -119,6 +124,7 @@ pub fn spawn_dot_on_click(
 ) {
     if buttons.just_pressed(MouseButton::Left) {
         if !gstate.open {
+            gstate.print_state();
             return;
         }
 
@@ -174,7 +180,7 @@ pub fn spawn_dot_on_click(
                             commands.entity(tile_entity).insert(new_dot.clone());
                             gstate.dot_storage.push(new_dot);
 
-                            gstate.next_turn();
+                            gstate.change_player();
                         }
                     }
                 }

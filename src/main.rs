@@ -11,7 +11,7 @@ use game::GameStatePlugin;
 use grid::GridPlugin;
 use utils::UtilsPlugin;
 
-pub const TILEMAP_SIZE: u32 = 10; // tilemap is square matrix shape
+pub const TILEMAP_SIZE: u32 = 100; // tilemap is square matrix shape
 pub const TILE_ASSET_SIZE: f32 = 32.0; // px
 pub const TILE_ASSET_PATH: &str = "tiles.png";
 
