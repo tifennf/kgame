@@ -180,7 +180,7 @@ pub fn spawn_dot_on_click(
                             commands.entity(tile_entity).insert(new_dot.clone());
                             gstate.dot_storage.push(new_dot);
 
-                            gstate.change_player();
+                            gstate.change_color();
                         }
                     }
                 }

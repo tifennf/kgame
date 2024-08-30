@@ -24,7 +24,7 @@ impl Default for GameState {
 }
 
 impl GameState {
-    pub fn change_player(&mut self) {
+    pub fn change_color(&mut self) {
         // TODO: use thread to speed up because each procedure are not dependant of each other
         let is_winner = check_rows(&self.dot_storage, &self.dot_color)
             || check_cols(&self.dot_storage, &self.dot_color)
