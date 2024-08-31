@@ -6,7 +6,7 @@ use crate::{
 };
 
 // Game internal state
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct GameState {
     pub dot_color: DotColor,
     pub dot_storage: DotStorage,

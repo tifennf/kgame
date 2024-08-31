@@ -6,7 +6,10 @@ mod utils;
 
 use std::sync::Arc;
 
-use api::{BevyMessage, ChannelManager, ServerMessage};
+use api::{
+    channel::{BevyMessage, ChannelManager, ServerMessage},
+    handler::get_game_state,
+};
 use axum::{routing::get, Router};
 use bevy::{prelude::*, tasks::IoTaskPool};
 
@@ -35,7 +38,8 @@ async fn main() {
             rx: rx_bevy,
         });
 
-        let app = Router::new().with_state(state);
+        let get = get(get_game_state);
+        let app = Router::new().with_state(state).route("/", get);
 
         let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 

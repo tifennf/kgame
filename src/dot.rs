@@ -63,6 +63,7 @@ impl fmt::Display for DotColor {
 }
 
 // dot storage implemented as a flat matrix
+#[derive(Clone)]
 pub struct DotStorage {
     pub dot_count: u32,
     pub n: usize,
