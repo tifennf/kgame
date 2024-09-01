@@ -1,6 +1,9 @@
 use std::future::IntoFuture;
 
-use bevy::prelude::{Res, Resource};
+use bevy::{
+    prelude::{Res, Resource},
+    tasks::IoTaskPool,
+};
 use flume::{Receiver, Sender};
 use serde_json::Value;
 
@@ -25,16 +28,19 @@ pub struct ChannelManager<T, L> {
     pub rx: Receiver<L>,
 }
 
-fn setup_bevy_channel(
+pub fn setup_bevy_channel(
     chan: Res<ChannelManager<BevyMessage, ServerMessage>>,
     gstate: Res<GameState>,
 ) {
-    let s = gstate.as_ref();
-
-    match chan.rx.recv().unwrap() {
-        ServerMessage::GetState => {
-            chan.tx.send(BevyMessage::GameState(s.clone())).unwrap();
+    while let Ok(msg) = chan.rx.try_recv() {
+        let s = gstate.as_ref().clone();
+        match msg {
+            ServerMessage::GetState => {
+                if let Err(e) = chan.tx.try_send(BevyMessage::GameState(s)) {
+                    println!("{}", e);
+                }
+            }
+            ServerMessage::PlaceDot => todo!(),
         }
-        ServerMessage::PlaceDot => todo!(),
     }
 }

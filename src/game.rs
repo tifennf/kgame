@@ -1,4 +1,5 @@
 use bevy::{app::Plugin, prelude::Resource};
+use serde::Serialize;
 
 use crate::{
     dot::{DotColor, DotStorage},
@@ -6,7 +7,7 @@ use crate::{
 };
 
 // Game internal state
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, Serialize)]
 pub struct GameState {
     pub dot_color: DotColor,
     pub dot_storage: DotStorage,

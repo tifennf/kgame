@@ -9,13 +9,29 @@ use bevy_ecs_tilemap::{
     map::{TilemapGridSize, TilemapSize, TilemapType},
     tiles::{TilePos, TileStorage},
 };
+use serde::{ser::SerializeStruct, Serialize};
 
 use crate::{game::GameState, utils::CursorPos};
+
+// each player can place a dot on grid
 #[derive(Component)]
 pub struct Dot {
     pub entity: Entity,
     pub color: DotColor,
     pub pos: TilePos,
+}
+
+impl Serialize for Dot {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("Dot", 3)?;
+        state.serialize_field("entity", &self.entity)?;
+        state.serialize_field("color", &self.color)?;
+        state.serialize_field("pos", &[self.pos.x, self.pos.y])?;
+        state.end()
+    }
 }
 
 impl Clone for Dot {
@@ -28,6 +44,7 @@ impl Clone for Dot {
     }
 }
 
+#[derive(Serialize)]
 pub enum DotColor {
     RED,
     BLUE,
@@ -63,7 +80,7 @@ impl fmt::Display for DotColor {
 }
 
 // dot storage implemented as a flat matrix
-#[derive(Clone)]
+#[derive(Clone, Serialize)]
 pub struct DotStorage {
     pub dot_count: u32,
     pub n: usize,

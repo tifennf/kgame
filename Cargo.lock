@@ -2440,6 +2440,7 @@ dependencies = [
  "bevy",
  "bevy_ecs_tilemap",
  "flume",
+ "serde",
  "serde_json",
  "tokio",
 ]
