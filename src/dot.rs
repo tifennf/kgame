@@ -11,7 +11,7 @@ use bevy_ecs_tilemap::{
 };
 use serde::{ser::SerializeStruct, Serialize};
 
-use crate::{game::GameState, utils::CursorPos};
+use crate::{game::GameState, grid::TileClickEvent, utils::CursorPos};
 
 // each player can place a dot on grid
 #[derive(Component)]
@@ -124,84 +124,53 @@ impl DotStorage {
     }
 }
 
-// system function to spawn dot when player click on a tile, according to his color
 pub fn spawn_dot_on_click(
     mut commands: Commands,
-    cursor_pos: Res<CursorPos>,
-    buttons: Res<ButtonInput<MouseButton>>,
-    q_tilemap: Query<(
-        &TilemapSize,
-        &TilemapGridSize,
-        &TilemapType,
-        &TileStorage,
-        &Transform,
-    )>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut gstate: ResMut<GameState>,
+    mut ev_tile_click: EventReader<TileClickEvent>,
 ) {
-    if buttons.just_pressed(MouseButton::Left) {
+    for ev in ev_tile_click.read().cloned() {
         if !gstate.open {
             gstate.print_state();
             return;
         }
 
-        for (map_size, grid_size, map_type, tile_storage, map_transform) in q_tilemap.iter() {
-            // needed in order to match tile with cursor
-            let position = cursor_pos.0;
-            let cursor_in_map_pos: Vec2 = {
-                // Extend the cursor_pos vec3 by 0.0 and 1.0
-                let cursor_pos = Vec4::from((position, 0.0, 1.0));
-                let cursor_in_map_pos = map_transform.compute_matrix().inverse() * cursor_pos;
-                cursor_in_map_pos.xy()
-            };
+        let TileClickEvent {
+            tile_entity,
+            tile_pos,
+            tile_center,
+            api,
+        } = ev;
 
-            if let Some(tile_pos) =
-                TilePos::from_world_pos(&cursor_in_map_pos, map_size, grid_size, map_type)
-            {
-                // compute tile center, 2 spaces involved: world, tilemap
-                let center = {
-                    // tile center in world basis
-                    let center_world = tile_pos.center_in_world(grid_size, map_type);
+        match gstate.dot_storage.peek(&tile_pos) {
+            Some(_) => (),
+            None => {
+                // spawn dot entity
+                let dot_entity = commands
+                    .spawn(MaterialMesh2dBundle {
+                        mesh: meshes.add(Circle::default()).into(),
+                        transform: Transform::default()
+                            .with_scale(Vec3::splat(16.0))
+                            .with_translation(tile_center.xy().extend(1.0)), // here
+                        material: materials.add(Color::from(gstate.dot_color.clone())),
+                        ..default()
+                    })
+                    .id();
 
-                    // using tilemap transformation, we change tile center basis to tilemap basis
-                    let center_tilemap =
-                        map_transform.compute_matrix() * Vec4::from((center_world, 0.0, 1.0));
-
-                    center_tilemap.xy()
+                // create a new dot component
+                let new_dot = Dot {
+                    entity: dot_entity,
+                    pos: tile_pos,
+                    color: gstate.dot_color.clone(),
                 };
 
-                if let Some(tile_entity) = tile_storage.get(&tile_pos) {
-                    match gstate.dot_storage.peek(&tile_pos) {
-                        Some(_) => (),
-                        None => {
-                            // spawn dot entity
-                            let dot_entity = commands
-                                .spawn(MaterialMesh2dBundle {
-                                    mesh: meshes.add(Circle::default()).into(),
-                                    transform: Transform::default()
-                                        .with_scale(Vec3::splat(16.0))
-                                        .with_translation(center.xy().extend(1.0)), // here
-                                    material: materials.add(Color::from(gstate.dot_color.clone())),
-                                    ..default()
-                                })
-                                .id();
+                // place dot on top of target tile and register it into dot storage
+                commands.entity(tile_entity).insert(new_dot.clone());
+                gstate.dot_storage.push(new_dot);
 
-                            // create a new dot component
-                            let new_dot = Dot {
-                                entity: dot_entity,
-                                pos: tile_pos,
-                                color: gstate.dot_color.clone(),
-                            };
-
-                            // place dot on top of target tile and register it into dot storage
-                            commands.entity(tile_entity).insert(new_dot.clone());
-                            gstate.dot_storage.push(new_dot);
-
-                            gstate.change_color();
-                        }
-                    }
-                }
+                gstate.change_color();
             }
         }
     }

@@ -12,7 +12,7 @@ use crate::game::GameState;
 // from bevy to server
 #[derive(Clone)]
 pub enum BevyMessage {
-    GameState(GameState),
+    State(GameState),
 }
 
 // from server to bevy
@@ -28,7 +28,8 @@ pub struct ChannelManager<T, L> {
     pub rx: Receiver<L>,
 }
 
-pub fn setup_bevy_channel(
+// communicate with server using channel in order to perform player's actions
+pub fn handle_bevy_channel(
     chan: Res<ChannelManager<BevyMessage, ServerMessage>>,
     gstate: Res<GameState>,
 ) {
@@ -36,7 +37,7 @@ pub fn setup_bevy_channel(
         let s = gstate.as_ref().clone();
         match msg {
             ServerMessage::GetState => {
-                if let Err(e) = chan.tx.try_send(BevyMessage::GameState(s)) {
+                if let Err(e) = chan.tx.try_send(BevyMessage::State(s)) {
                     println!("{}", e);
                 }
             }

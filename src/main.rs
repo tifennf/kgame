@@ -7,7 +7,7 @@ mod utils;
 use std::sync::Arc;
 
 use api::{
-    channel::{setup_bevy_channel, BevyMessage, ChannelManager, ServerMessage},
+    channel::{handle_bevy_channel, BevyMessage, ChannelManager, ServerMessage},
     handler::get_game_state,
 };
 use axum::{routing::get, Router};
@@ -58,6 +58,6 @@ async fn main() {
             tx: tx_bevy,
             rx: rx_server,
         })
-        .add_systems(FixedUpdate, setup_bevy_channel)
+        .add_systems(FixedUpdate, handle_bevy_channel)
         .run();
 }
