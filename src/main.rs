@@ -39,7 +39,7 @@ async fn main() {
         });
 
         let get = get(get_game_state);
-        let app = Router::new().with_state(state).route("/", get);
+        let app = Router::new().route("/", get).with_state(state);
 
         let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
