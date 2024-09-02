@@ -9,9 +9,14 @@ use bevy_ecs_tilemap::{
     map::{TilemapGridSize, TilemapSize, TilemapType},
     tiles::{TilePos, TileStorage},
 };
-use serde::{ser::SerializeStruct, Serialize};
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
-use crate::{game::GameState, grid::TileClickEvent, utils::CursorPos};
+use crate::{
+    api::channel::{BevyMessage, ChannelManager, ServerMessage},
+    game::GameState,
+    grid::TileClickEvent,
+    utils::CursorPos,
+};
 
 // each player can place a dot on grid
 #[derive(Component)]
@@ -44,7 +49,7 @@ impl Clone for Dot {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub enum DotColor {
     RED,
     BLUE,
@@ -130,6 +135,7 @@ pub fn spawn_dot_on_click(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut gstate: ResMut<GameState>,
     mut ev_tile_click: EventReader<TileClickEvent>,
+    chan: Res<ChannelManager<BevyMessage, ServerMessage>>,
 ) {
     for ev in ev_tile_click.read().cloned() {
         if !gstate.open {
@@ -145,7 +151,11 @@ pub fn spawn_dot_on_click(
         } = ev;
 
         match gstate.dot_storage.peek(&tile_pos) {
-            Some(_) => (),
+            Some(_) => {
+                if api {
+                    chan.tx.try_send(BevyMessage::InvalidDotPosition).unwrap();
+                }
+            }
             None => {
                 // spawn dot entity
                 let dot_entity = commands
@@ -171,6 +181,10 @@ pub fn spawn_dot_on_click(
                 gstate.dot_storage.push(new_dot);
 
                 gstate.change_color();
+
+                if api {
+                    chan.tx.try_send(BevyMessage::DotPlaced).unwrap();
+                }
             }
         }
     }

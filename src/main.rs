@@ -8,9 +8,12 @@ use std::sync::Arc;
 
 use api::{
     channel::{handle_bevy_channel, BevyMessage, ChannelManager, ServerMessage},
-    handler::get_game_state,
+    handler::{get_game_state, place_dot},
 };
-use axum::{routing::get, Router};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 use bevy::prelude::*;
 
 use bevy_ecs_tilemap::TilemapPlugin;
@@ -38,8 +41,10 @@ async fn main() {
             rx: rx_bevy,
         });
 
-        let get = get(get_game_state);
-        let app = Router::new().route("/", get).with_state(state);
+        let app = Router::new()
+            .route("/state", get(get_game_state))
+            .route("/dot", post(place_dot))
+            .with_state(state);
 
         let listener = tokio::net::TcpListener::bind(ADDR).await.unwrap();
 

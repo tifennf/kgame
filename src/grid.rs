@@ -101,16 +101,8 @@ pub fn handle_tile_click(
             {
                 if let Some(tile_entity) = tile_storage.get(&tile_pos) {
                     // compute tile center, 2 spaces involved: world, tilemap
-                    let tile_center = {
-                        // tile center in world basis
-                        let center_world = tile_pos.center_in_world(grid_size, map_type);
-
-                        // using tilemap transformation, we change tile center basis to tilemap basis
-                        let center_tilemap =
-                            map_transform.compute_matrix() * Vec4::from((center_world, 0.0, 1.0));
-
-                        center_tilemap.xy()
-                    };
+                    let tile_center =
+                        compute_tile_center_map(&tile_pos, grid_size, map_type, map_transform);
 
                     // TileClickEvent
                     ev_tile_click.send(TileClickEvent {
@@ -142,4 +134,23 @@ impl Plugin for GridPlugin {
             .add_systems(Update, handle_tile_click)
             .insert_resource(ClearColor(Color::WHITE));
     }
+}
+
+pub fn compute_tile_center_map(
+    tile_pos: &TilePos,
+    grid_size: &TilemapGridSize,
+    map_type: &TilemapType,
+    map_transform: &Transform,
+) -> Vec2 {
+    let tile_center = {
+        // tile center in world basis
+        let center_world = tile_pos.center_in_world(grid_size, map_type);
+
+        // using tilemap transformation, we change tile center basis to tilemap basis
+        let center_tilemap = map_transform.compute_matrix() * Vec4::from((center_world, 0.0, 1.0));
+
+        center_tilemap.xy()
+    };
+
+    tile_center
 }
