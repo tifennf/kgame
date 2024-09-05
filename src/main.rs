@@ -55,12 +55,10 @@ async fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(UtilsPlugin)
-        .add_systems(OnEnter(GameState::InGame), setup_grid)
         .add_plugins(GamePlugin)
         .add_plugins(GridPlugin)
         .add_plugins(TilemapPlugin)
         .add_systems(Update, spawn_dot)
-        .add_systems(Update, toggle_game)
         .insert_resource(ChannelManager {
             tx: tx_bevy,
             rx: rx_server,

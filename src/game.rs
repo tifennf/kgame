@@ -1,15 +1,15 @@
 use bevy::{
-    app::Plugin,
+    app::{Plugin, Update},
     input::{keyboard::Key, ButtonInput},
     prelude::{
-        in_state, AppExtStates, IntoSystemConfigs, KeyCode, NextState, Res, ResMut, Resource,
-        State, States,
+        in_state, AppExtStates, Commands, IntoSystemConfigs, KeyCode, NextState, OnExit, Query,
+        Res, ResMut, Resource, State, States,
     },
 };
 use serde::Serialize;
 
 use crate::{
-    dot::{DotColor, DotStorage},
+    dot::{Dot, DotColor, DotStorage},
     KAING_VALUE, TILEMAP_SIZE,
 };
 
@@ -259,10 +259,27 @@ impl Default for GameState {
     }
 }
 
+// remove all dot entities and set new game data
+fn clean_game(mut game: ResMut<Game>, mut commands: Commands) {
+    for dot in game.dot_storage.get_storage() {
+        if let Some(dot) = dot {
+            commands.entity(dot.entity).despawn();
+        }
+    }
+
+    *game = Game::default();
+}
+
+// print game result on state GameOver
+fn game_result() {}
+
 pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
-        app.init_resource::<Game>().init_state::<GameState>();
+        app.init_resource::<Game>()
+            .init_state::<GameState>()
+            .add_systems(OnExit(GameState::GameOver), clean_game)
+            .add_systems(Update, toggle_game);
     }
 }

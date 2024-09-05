@@ -130,6 +130,7 @@ pub struct GridPlugin;
 impl Plugin for GridPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_event::<TileClickEvent>()
+            .add_systems(Startup, setup_grid)
             .add_systems(Update, handle_tile_click)
             .insert_resource(ClearColor(Color::WHITE));
     }

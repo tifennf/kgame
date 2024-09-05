@@ -104,6 +104,10 @@ impl DotStorage {
         }
     }
 
+    pub fn get_storage(&self) -> &Vec<Option<Dot>> {
+        &self.matrix
+    }
+
     pub fn get(&self, x: usize, y: usize) -> &Option<Dot> {
         &self.matrix[x * self.n + y]
     }
