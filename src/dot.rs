@@ -13,7 +13,7 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 use crate::{
     api::channel::{BevyMessage, ChannelManager, ServerMessage},
-    game::GameState,
+    game::{is_winner, Game, GameState},
     grid::TileClickEvent,
     utils::CursorPos,
 };
@@ -129,17 +129,20 @@ impl DotStorage {
     }
 }
 
-pub fn spawn_dot_on_click(
+// place a dot on the grid when a TileClickEvent occur
+pub fn spawn_dot(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    mut gstate: ResMut<GameState>,
+    mut game: ResMut<Game>,
     mut ev_tile_click: EventReader<TileClickEvent>,
     chan: Res<ChannelManager<BevyMessage, ServerMessage>>,
+    state: Res<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for ev in ev_tile_click.read().cloned() {
-        if !gstate.open {
-            gstate.print_state();
+        if let GameState::GameOver = state.get() {
+            game.print_state();
             return;
         }
 
@@ -150,7 +153,7 @@ pub fn spawn_dot_on_click(
             api,
         } = ev;
 
-        match gstate.dot_storage.peek(&tile_pos) {
+        match game.dot_storage.peek(&tile_pos) {
             Some(_) => {
                 if api {
                     chan.tx.try_send(BevyMessage::InvalidDotPosition).unwrap();
@@ -164,7 +167,7 @@ pub fn spawn_dot_on_click(
                         transform: Transform::default()
                             .with_scale(Vec3::splat(16.0))
                             .with_translation(tile_center.xy().extend(1.0)), // here
-                        material: materials.add(Color::from(gstate.dot_color.clone())),
+                        material: materials.add(Color::from(game.dot_color.clone())),
                         ..default()
                     })
                     .id();
@@ -173,18 +176,23 @@ pub fn spawn_dot_on_click(
                 let new_dot = Dot {
                     entity: dot_entity,
                     pos: tile_pos,
-                    color: gstate.dot_color.clone(),
+                    color: game.dot_color.clone(),
                 };
 
                 // place dot on top of target tile and register it into dot storage
                 commands.entity(tile_entity).insert(new_dot.clone());
-                gstate.dot_storage.push(new_dot);
-
-                gstate.change_color();
-
+                game.dot_storage.push(new_dot);
                 if api {
                     chan.tx.try_send(BevyMessage::DotPlaced).unwrap();
                 }
+
+                if is_winner(&game) {
+                    next_state.set(GameState::GameOver);
+                    game.print_state();
+                    return;
+                }
+
+                game.next_player();
             }
         }
     }

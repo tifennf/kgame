@@ -5,8 +5,8 @@ use bevy::{
     input::ButtonInput,
     math::{Vec2, Vec4, Vec4Swizzles},
     prelude::{
-        Camera2dBundle, ClearColor, Commands, Entity, Event, EventWriter, Image, MouseButton,
-        Query, Res, Transform,
+        in_state, Camera2dBundle, ClearColor, Commands, Entity, Event, EventWriter, Image,
+        IntoSystemConfigs, MouseButton, Query, Res, Transform,
     },
 };
 use bevy_ecs_tilemap::{
@@ -16,9 +16,9 @@ use bevy_ecs_tilemap::{
     TilemapBundle,
 };
 
-use crate::{utils::CursorPos, TILEMAP_SIZE, TILE_ASSET_PATH, TILE_ASSET_SIZE};
+use crate::{game::GameState, utils::CursorPos, TILEMAP_SIZE, TILE_ASSET_PATH, TILE_ASSET_SIZE};
 
-fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_grid(mut cmd: Commands, asset_server: Res<AssetServer>) {
     // camera for rendering
     cmd.spawn(Camera2dBundle::default());
 
@@ -130,7 +130,6 @@ pub struct GridPlugin;
 impl Plugin for GridPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.add_event::<TileClickEvent>()
-            .add_systems(Startup, setup_grid)
             .add_systems(Update, handle_tile_click)
             .insert_resource(ClearColor(Color::WHITE));
     }

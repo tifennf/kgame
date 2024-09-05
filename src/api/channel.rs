@@ -9,10 +9,9 @@ use bevy_ecs_tilemap::{
     tiles::TileStorage,
 };
 use flume::{Receiver, Sender};
-use serde_json::Value;
 
 use crate::{
-    game::GameState,
+    game::Game,
     grid::{compute_tile_center_map, TileClickEvent},
 };
 
@@ -21,7 +20,7 @@ use super::handler::ApiDot;
 // from bevy to server
 #[derive(Clone)]
 pub enum BevyMessage {
-    State(GameState),
+    State(Game),
     DotPlaced,
     InvalidDotPosition,
 }
@@ -42,7 +41,7 @@ pub struct ChannelManager<T, L> {
 // communicate with server using channel in order to perform player's actions
 pub fn handle_bevy_channel(
     chan: Res<ChannelManager<BevyMessage, ServerMessage>>,
-    gstate: Res<GameState>,
+    gstate: Res<Game>,
     q_tilemap: Query<(
         &TilemapSize,
         &TilemapGridSize,
@@ -63,10 +62,7 @@ pub fn handle_bevy_channel(
             ServerMessage::PlaceDot(dot) => {
                 let tile_pos = dot.get_tilepos();
 
-                println!("({}, {})", dot.tilemap_pos.0, dot.tilemap_pos.1);
-
-                for (map_size, grid_size, map_type, tile_storage, map_transform) in q_tilemap.iter()
-                {
+                for (_, grid_size, map_type, tile_storage, map_transform) in q_tilemap.iter() {
                     if let Some(tile_entity) = tile_storage.get(&tile_pos) {
                         // compute tile center, 2 spaces involved: world, tilemap
                         let tile_center =

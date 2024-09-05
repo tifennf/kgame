@@ -1,4 +1,11 @@
-use bevy::{app::Plugin, prelude::Resource};
+use bevy::{
+    app::Plugin,
+    input::{keyboard::Key, ButtonInput},
+    prelude::{
+        in_state, AppExtStates, IntoSystemConfigs, KeyCode, NextState, Res, ResMut, Resource,
+        State, States,
+    },
+};
 use serde::Serialize;
 
 use crate::{
@@ -8,13 +15,13 @@ use crate::{
 
 // Game internal state
 #[derive(Resource, Clone, Serialize)]
-pub struct GameState {
+pub struct Game {
     pub dot_color: DotColor,
     pub dot_storage: DotStorage,
     pub open: bool,
 }
 
-impl Default for GameState {
+impl Default for Game {
     fn default() -> Self {
         Self {
             dot_color: DotColor::BLUE,
@@ -24,8 +31,9 @@ impl Default for GameState {
     }
 }
 
-impl GameState {
-    pub fn change_color(&mut self) {
+impl Game {
+    // change to next player is game is not over by changing current color
+    pub fn next_player(&mut self) {
         // TODO: use thread to speed up because each procedure are not dependant of each other
         let is_winner = check_rows(&self.dot_storage, &self.dot_color)
             || check_cols(&self.dot_storage, &self.dot_color)
@@ -62,12 +70,14 @@ impl GameState {
     }
 }
 
-pub struct GameStatePlugin;
+pub fn is_winner(game: &Game) -> bool {
+    // TODO: use thread to speed up because each procedure are not dependant of each other
+    let is_winner = check_rows(&game.dot_storage, &game.dot_color)
+        || check_cols(&game.dot_storage, &game.dot_color)
+        || check_anti_diags(&game.dot_storage, &game.dot_color)
+        || check_diags(&game.dot_storage, &game.dot_color);
 
-impl Plugin for GameStatePlugin {
-    fn build(&self, app: &mut bevy::prelude::App) {
-        app.init_resource::<GameState>();
-    }
+    is_winner
 }
 
 fn check_rows(board: &DotStorage, color: &DotColor) -> bool {
@@ -222,4 +232,37 @@ fn check_diags(board: &DotStorage, color: &DotColor) -> bool {
     }
 
     false
+}
+
+pub fn toggle_game(
+    keys: Res<ButtonInput<KeyCode>>,
+    state: Res<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
+    if keys.just_pressed(KeyCode::Enter) {
+        match state.get() {
+            GameState::InGame => next_state.set(GameState::GameOver),
+            GameState::GameOver => next_state.set(GameState::InGame),
+        }
+    }
+}
+
+#[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum GameState {
+    InGame,
+    GameOver,
+}
+
+impl Default for GameState {
+    fn default() -> Self {
+        GameState::InGame
+    }
+}
+
+pub struct GamePlugin;
+
+impl Plugin for GamePlugin {
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app.init_resource::<Game>().init_state::<GameState>();
+    }
 }

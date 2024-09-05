@@ -4,7 +4,7 @@ use axum::{extract::State, Json};
 use bevy_ecs_tilemap::tiles::TilePos;
 use serde::Deserialize;
 
-use crate::{dot::DotColor, game::GameState};
+use crate::{dot::DotColor, game::Game};
 
 use super::channel::{BevyMessage, ChannelManager, ServerMessage};
 
@@ -25,7 +25,7 @@ impl ApiDot {
 }
 
 // sendback game state on GET /
-pub async fn get_game_state(State(chan): State<Chan>) -> Json<Option<GameState>> {
+pub async fn get_game_state(State(chan): State<Chan>) -> Json<Option<Game>> {
     chan.tx.send_async(ServerMessage::GetState).await.unwrap();
 
     if let BevyMessage::State(s) = chan.rx.recv_async().await.unwrap() {

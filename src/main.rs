@@ -17,9 +17,9 @@ use axum::{
 use bevy::prelude::*;
 
 use bevy_ecs_tilemap::TilemapPlugin;
-use dot::spawn_dot_on_click;
-use game::GameStatePlugin;
-use grid::GridPlugin;
+use dot::spawn_dot;
+use game::{toggle_game, GamePlugin, GameState};
+use grid::{setup_grid, GridPlugin};
 use utils::UtilsPlugin;
 
 pub const TILEMAP_SIZE: u32 = 16; // tilemap is square matrix shape
@@ -55,10 +55,12 @@ async fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(UtilsPlugin)
-        .add_plugins(GameStatePlugin)
+        .add_systems(OnEnter(GameState::InGame), setup_grid)
+        .add_plugins(GamePlugin)
         .add_plugins(GridPlugin)
         .add_plugins(TilemapPlugin)
-        .add_systems(Update, spawn_dot_on_click)
+        .add_systems(Update, spawn_dot)
+        .add_systems(Update, toggle_game)
         .insert_resource(ChannelManager {
             tx: tx_bevy,
             rx: rx_server,
