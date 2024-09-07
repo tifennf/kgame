@@ -8,7 +8,7 @@ use std::sync::Arc;
 
 use api::{
     channel::{handle_bevy_channel, BevyMessage, ChannelManager, ServerMessage},
-    handler::{get_game_state, place_dot},
+    handler::{get_game_data, place_dot},
 };
 use axum::{
     routing::{get, post},
@@ -18,7 +18,7 @@ use bevy::prelude::*;
 
 use bevy_ecs_tilemap::TilemapPlugin;
 use dot::spawn_dot;
-use game::{toggle_game, GamePlugin, GameState};
+use game::{change_state, GamePlugin, GameState};
 use grid::{setup_grid, GridPlugin};
 use utils::UtilsPlugin;
 
@@ -42,7 +42,7 @@ async fn main() {
         });
 
         let app = Router::new()
-            .route("/state", get(get_game_state))
+            .route("/state", get(get_game_data))
             .route("/dot", post(place_dot))
             .with_state(state);
 

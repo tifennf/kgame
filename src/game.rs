@@ -2,8 +2,8 @@ use bevy::{
     app::{Plugin, Update},
     input::{keyboard::Key, ButtonInput},
     prelude::{
-        in_state, AppExtStates, Commands, IntoSystemConfigs, KeyCode, NextState, OnExit, Query,
-        Res, ResMut, Resource, State, States,
+        in_state, AppExtStates, Commands, IntoSystemConfigs, KeyCode, NextState, OnEnter, OnExit,
+        Query, Res, ResMut, Resource, State, States,
     },
 };
 use serde::Serialize;
@@ -34,13 +34,7 @@ impl Default for Game {
 impl Game {
     // change to next player is game is not over by changing current color
     pub fn next_player(&mut self) {
-        // TODO: use thread to speed up because each procedure are not dependant of each other
-        let is_winner = check_rows(&self.dot_storage, &self.dot_color)
-            || check_cols(&self.dot_storage, &self.dot_color)
-            || check_anti_diags(&self.dot_storage, &self.dot_color)
-            || check_diags(&self.dot_storage, &self.dot_color);
-
-        if is_winner {
+        if !self.open {
             self.open = false;
             self.print_state();
             return;
@@ -70,6 +64,7 @@ impl Game {
     }
 }
 
+// check if there is a game winner
 pub fn is_winner(game: &Game) -> bool {
     // TODO: use thread to speed up because each procedure are not dependant of each other
     let is_winner = check_rows(&game.dot_storage, &game.dot_color)
@@ -80,10 +75,8 @@ pub fn is_winner(game: &Game) -> bool {
     is_winner
 }
 
+// check for a Kaing in every rows
 fn check_rows(board: &DotStorage, color: &DotColor) -> bool {
-    // check for a Kaing in every rows
-    // pre: p > 0
-
     let n = board.n;
 
     for j in 0..n {
@@ -109,10 +102,8 @@ fn check_rows(board: &DotStorage, color: &DotColor) -> bool {
     false
 }
 
+// check for a for a Kaing in every cols
 fn check_cols(board: &DotStorage, color: &DotColor) -> bool {
-    // check for a for a Kaing in every cols
-    // pre: p > 0
-
     let n = board.n;
 
     for i in 0..n {
@@ -138,13 +129,11 @@ fn check_cols(board: &DotStorage, color: &DotColor) -> bool {
     false
 }
 
+// check for a Kaing in every anti-diagonals
 fn check_anti_diags(board: &DotStorage, color: &DotColor) -> bool {
-    // check for a Kaing in every anti-diagonals
-    // pre: p > 0
-
     let n = board.n;
 
-    let k_sup = 1 + 2 * (n - 1);
+    let k_sup = 1 + 2 * (n - 1); //
 
     for k in 0..k_sup {
         let mut count = 0;
@@ -182,10 +171,8 @@ fn check_anti_diags(board: &DotStorage, color: &DotColor) -> bool {
     false
 }
 
+// check a for a Kaing in every diagonales
 fn check_diags(board: &DotStorage, color: &DotColor) -> bool {
-    // check a for a Kaing in every anti-diagonales
-    // pre: p > 0 && board is a valid board with size >= KAING_VALUE
-
     let n = board.n;
 
     let mut i_basis = 4;
@@ -234,7 +221,8 @@ fn check_diags(board: &DotStorage, color: &DotColor) -> bool {
     false
 }
 
-pub fn toggle_game(
+// change state of the game
+pub fn change_state(
     keys: Res<ButtonInput<KeyCode>>,
     state: Res<State<GameState>>,
     mut next_state: ResMut<NextState<GameState>>,
@@ -247,6 +235,7 @@ pub fn toggle_game(
     }
 }
 
+// represent game state
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum GameState {
     InGame,
@@ -270,8 +259,10 @@ fn clean_game(mut game: ResMut<Game>, mut commands: Commands) {
     *game = Game::default();
 }
 
-// print game result on state GameOver
-fn game_result() {}
+// toggle open field in game data
+fn toggle_open(mut game: ResMut<Game>) {
+    game.open = !game.open;
+}
 
 pub struct GamePlugin;
 
@@ -280,6 +271,7 @@ impl Plugin for GamePlugin {
         app.init_resource::<Game>()
             .init_state::<GameState>()
             .add_systems(OnExit(GameState::GameOver), clean_game)
-            .add_systems(Update, toggle_game);
+            .add_systems(Update, change_state)
+            .add_systems(OnEnter(GameState::GameOver), toggle_open);
     }
 }
