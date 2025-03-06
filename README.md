@@ -15,3 +15,8 @@ You can play it on paper like that:
 
 Of course, you can play it with more players.
 
+## HTTP Web server
+There is a web server running on another thread inside the application, you can use it to play the game with HTTP request.
+
+## TODO
+- Implement a reinforcement learning algorithm using game HTTP endpoint
